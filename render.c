@@ -180,8 +180,13 @@ void mouse(int button, int state, int mouseX, int mouseY) {
       redraw();
       system("scrot -u current_out.png");
       glutPostRedisplay();
+/*      printf("****************************\n");
       read_png_file("mona.png");
       process_file();
+      printf("****************************\n");
+      read_png_file("current_out.png");
+      process_file();*/
+      compare_images("current_out.png","mona.png");
     }
   }
 }

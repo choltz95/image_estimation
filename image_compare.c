@@ -24,6 +24,8 @@ png_byte bit_depth;
 png_structp png_ptr;
 png_infop info_ptr;
 int number_of_passes;
+png_bytep * img1_row_pointers;
+png_bytep * img2_row_pointers;
 png_bytep * row_pointers;
 
 void read_png_file(char* file_name) {
@@ -46,19 +48,16 @@ void read_png_file(char* file_name) {
     if (!png_ptr) {
         cberror("[read_png_file] png_create_read_struct failed");
     }
-
     info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr) {
         cberror("[read_png_file] png_create_info_struct failed");
     }
-
     if (setjmp(png_jmpbuf(png_ptr))) {
         cberror("[read_png_file] Error during init_io");
     }
 
     png_init_io(png_ptr, fp);
     png_set_sig_bytes(png_ptr, 8);
-
     png_read_info(png_ptr, info_ptr);
 
     width = png_get_image_width(png_ptr, info_ptr);
@@ -85,33 +84,54 @@ void read_png_file(char* file_name) {
     fclose(fp);
 }
 
-void process_file(void) {
-/*
-    if (png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_RGB)
-        cberror("[process_file] input file is PNG_COLOR_TYPE_RGB but must be PNG_COLOR_TYPE_RGBA "
+png_bytep* process_file(void) {
+    png_bytep * pixels;
+    if (png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_RGBA) {
+        cberror("[process_file] input file is PNG_COLOR_TYPE_RGBA but must be PNG_COLOR_TYPE_RGB "
                 "(lacks the alpha channel)");
-
-    if (png_get_color_type(png_ptr, info_ptr) != PNG_COLOR_TYPE_RGBA)
-        cberror("[process_file] color_type of input file must be PNG_COLOR_TYPE_RGBA (%d) (is %d)",
+    }
+    if (png_get_color_type(png_ptr, info_ptr) != PNG_COLOR_TYPE_RGB) {
+        cberror("[process_file] color_type of input file must be PNG_COLOR_TYPE_RGB (%d) (is %d)",
                 PNG_COLOR_TYPE_RGBA, png_get_color_type(png_ptr, info_ptr));
-*/
-    for (y=0; y<height; y++) {
-        png_byte* row = row_pointers[y];
+    }
+    pixels = row_pointers;
+/*    for (y=0; y<height; y++) {
+        row = row_pointers[y];
         for (x=0; x<width; x++) {
-            png_byte* ptr = &(row[x*4]);
+            png_byte* ptr = &(row[x*3]);
             printf("Pixel at position [ %d - %d ] has RGB values: %d - %d - %d\n",
             x, y, ptr[0], ptr[1], ptr[2]);
         }
     }
+*/
+    return pixels;
 }
 
-/*  gcc -o png png.c -lm -lpng */
-/*int main(int argc, char **argv) {
-    if (argc != 2)
-        cberror("Usage: program_name <file_in>");
-    
-    read_png_file(argv[1]);
-    process_file();
+int compare_images(char* img1, char* img2) { // take monalisa as second arg
+    int fitness;
+    int pixel_fitness;
+    png_bytep * image1;
+    png_bytep * image2;
+    read_png_file(img1);
+    image1 = process_file();
+    read_png_file(img2);
+    image2 = process_file();
 
-    return 0;
-}*/
+    png_byte * row1;
+    png_byte * row2;
+
+    for (y=0; y<height; y++) {
+        row1 = image1[y];
+        row2 = image2[y];
+        for (x=0; x<width; x++) {
+            png_byte* ptr1 = &(row1[x*3]);
+            png_byte* ptr2 = &(row2[x*3]);
+            printf("Difference in pixel color at position [ %d - %d ] is: %d - %d - %d\n",
+            x, y, ptr1[0]-ptr2[0], ptr1[1]-ptr2[1], ptr1[2]-ptr2[2]);
+            pixel_fitness = (ptr1[0]-ptr2[0])*(ptr1[0]-ptr2[0])+(ptr1[1]-ptr2[1])*(ptr1[1]-ptr2[1])+(ptr1[2]-ptr2[2])*(ptr1[2]-ptr2[2]);
+            fitness += pixel_fitness;
+        }
+    }
+
+    return fitness;
+}

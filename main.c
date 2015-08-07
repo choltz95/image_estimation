@@ -7,7 +7,7 @@
 #include "render.h"
 /* ARGSUSED1 */
 static void key(unsigned char key, int x, int y) {
-  UNUSED(x);
+  UNUSED(x); // UNUSED macro defined in render.h
   UNUSED(y);
   switch (key) {
   case 'z':
