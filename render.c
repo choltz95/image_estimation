@@ -4,7 +4,9 @@
 #include <string.h>
 #include <time.h>
 #include <GL/glut.h>
+
 #include "render.h"
+#include "image_compare.h"
 
 GLint windW = 300, windH = 300;
 
@@ -17,7 +19,13 @@ GLint objectCount;
 GLint numObjects;
 GLenum linePoly = GL_FALSE;
 
-static void InitObjects(GLint num) {
+
+void init(void) {
+  numObjects = 50;
+  init_polygons(numObjects);
+}
+
+void init_polygons(GLint num) {
   GLint i;
   float x, y;
 
@@ -47,18 +55,13 @@ static void InitObjects(GLint num) {
   }
 }
 
-void Init(void) {
-  numObjects = 50;
-  InitObjects(numObjects);
-}
-
-void Reshape(int width, int height) {
+void reshape(int width, int height) {
   windW = width;
   windH = height;
   // multisampling
-  glEnable(GL_MULTISAMPLE);
-  glutSetOption(GLUT_MULTISAMPLE, 8);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
+  //glEnable(GL_MULTISAMPLE);
+  //glutSetOption(GLUT_MULTISAMPLE, 8);
+  //glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
   // transparency
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
@@ -73,7 +76,6 @@ static void Render(GLenum mode) {
     if (mode == GL_SELECT) {
       glLoadName(i);
     }
-    //glColor3fv(objects[i].color);
     glColor4fv(objects[i].color);
     glBegin(GL_POLYGON);
     glVertex2fv(objects[i].v1);
@@ -116,63 +118,75 @@ static GLint DoSelect(GLint x, GLint y) {
   return selectBuf[(hits - 1) * 4 + 3];
 }
 
-static void RecolorTri(GLint h) {
+static void recolor_poly(GLint h) {
   objects[h].color[0] = ((rand() % 100) + 50) / 150.0;
   objects[h].color[1] = ((rand() % 100) + 50) / 150.0;
   objects[h].color[2] = ((rand() % 100) + 50) / 150.0;
+  objects[h].color[3] = (double)rand() / (double)RAND_MAX; // alpha value
 }
 
-static void DeleteTri(GLint h) {
+static void resize_poly(GLint h) {
+  float x = (rand() % 300) - 150;
+  float y = (rand() % 300) - 150;
+  objects[h].v1[0] = x + (rand() % 50) - 25;
+  objects[h].v2[0] = x + (rand() % 50) - 25;
+  objects[h].v3[0] = x + (rand() % 50) - 25;
+  objects[h].v1[1] = y + (rand() % 50) - 25;
+  objects[h].v2[1] = y + (rand() % 50) - 25;
+  objects[h].v3[1] = y + (rand() % 50) - 25;
+}
+
+void redraw() {
+GLint i;
+float x, y;
+for (i = 0; i < numObjects; i++) {
+    x = (rand() % 300) - 150;
+    y = (rand() % 300) - 150;
+
+    objects[i].v1[0] = x + (rand() % 50) - 25;
+    objects[i].v2[0] = x + (rand() % 50) - 25;
+    objects[i].v3[0] = x + (rand() % 50) - 25;
+    objects[i].v1[1] = y + (rand() % 50) - 25;
+    objects[i].v2[1] = y + (rand() % 50) - 25;
+    objects[i].v3[1] = y + (rand() % 50) - 25;
+    objects[i].color[0] = ((rand() % 100) + 50) / 150.0;
+    objects[i].color[1] = ((rand() % 100) + 50) / 150.0;
+    objects[i].color[2] = ((rand() % 100) + 50) / 150.0;
+    objects[i].color[3] = (double)rand() / (double)RAND_MAX; // alpha value
+  }
+}
+
+static void delete_poly(GLint h) {
   objects[h] = objects[objectCount - 1];
   objectCount--;
 }
 
-static void GrowTri(GLint h) {
-  float v[2];
-  float *oldV;
-  GLint i;
-
-  v[0] = objects[h].v1[0] + objects[h].v2[0] + objects[h].v3[0];
-  v[1] = objects[h].v1[1] + objects[h].v2[1] + objects[h].v3[1];
-  v[0] /= 3;
-  v[1] /= 3;
-
-  for (i = 0; i < 3; i++) {
-    switch (i) {
-    case 0:
-      oldV = objects[h].v1;
-      break;
-    case 1:
-      oldV = objects[h].v2;
-      break;
-    case 2:
-      oldV = objects[h].v3;
-      break;
-    }
-    oldV[0] = 1.5 * (oldV[0] - v[0]) + v[0];
-    oldV[1] = 1.5 * (oldV[1] - v[1]) + v[1];
-  }
-}
-
-void Mouse(int button, int state, int mouseX, int mouseY) {
+void mouse(int button, int state, int mouseX, int mouseY) {
   GLint hit;
 
   if (state == GLUT_DOWN) {
     hit = DoSelect((GLint) mouseX, (GLint) mouseY);
     if (hit != -1) {
       if (button == GLUT_LEFT_BUTTON) {
-        RecolorTri(hit);
+        recolor_poly(hit);
       } else if (button == GLUT_MIDDLE_BUTTON) {
-        GrowTri(hit);
+        resize_poly(hit);
       } else if (button == GLUT_RIGHT_BUTTON) {
-        DeleteTri(hit);
+        delete_poly(hit);
       }
       glutPostRedisplay();
+    }
+    else {
+      redraw();
+      system("scrot -u current_out.png");
+      glutPostRedisplay();
+      read_png_file("mona.png");
+      process_file();
     }
   }
 }
 
-void Draw(void) {
+void draw(void) {
   glPushMatrix();
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();

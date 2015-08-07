@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -g -O3
-LDFLAGS= -lm -lGL -lGLU -lglut
+LDFLAGS= -lm -lGL -lGLU -lglut -lpng 
 SRCFILES=$(wildcard *.c)
 OBJFILES=$(SRCFILES:.c=.o)
 DEPFILES=$(SRCFILES:.c=.d)

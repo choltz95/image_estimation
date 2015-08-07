@@ -6,7 +6,9 @@
 #include <GL/glut.h>
 #include "render.h"
 /* ARGSUSED1 */
-static void Key(unsigned char key, int x, int y) {
+static void key(unsigned char key, int x, int y) {
+  UNUSED(x);
+  UNUSED(y);
   switch (key) {
   case 'z':
     zoom /= 0.75;
@@ -35,7 +37,9 @@ static void Key(unsigned char key, int x, int y) {
 }
 
 /* ARGSUSED1 */
-static void SpecialKey(int key, int x, int y) {
+static void special_key(int key, int x, int y) {
+  UNUSED(x);
+  UNUSED(y);
   switch (key) {
   case GLUT_KEY_LEFT:
     zRotation += 0.5;
@@ -52,12 +56,12 @@ int main(int argc, char **argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
   glutCreateWindow("Select Test");
-  Init();
-  glutReshapeFunc(Reshape);
-  glutKeyboardFunc(Key);
-  glutSpecialFunc(SpecialKey);
-  glutMouseFunc(Mouse);
-  glutDisplayFunc(Draw);
+  init();
+  glutReshapeFunc(reshape);
+  glutKeyboardFunc(key);
+  glutSpecialFunc(special_key);
+  glutMouseFunc(mouse);
+  glutDisplayFunc(draw);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0;
 }

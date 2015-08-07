@@ -1,8 +1,8 @@
 #ifndef _RENDER_H_
 #define _RENDER_H_
-
 #include <GL/glut.h>
 
+#define UNUSED(expr) do { (void)(expr); } while (0) // silence unused glut variables
 
 #define MAXOBJS 10000
 #define MAXSELECT 100
@@ -21,18 +21,12 @@ struct object {
   float color[4];
 } objects[MAXOBJS];
 
-static void InitObjects(GLint num);
-void Init(void);
-void Reshape(int width, int height);
-static void Render(GLenum mode);
-static GLint DoSelect(GLint x, GLint y);
-static void RecolorTri(GLint h);
-static void DeleteTri(GLint h);
-static void GrowTri(GLint h);
-void Mouse(int button, int state, int mouseX, int mouseY);
-void Draw(void);
-static void DumpFeedbackVert(GLint * i, GLint n);
-static void DrawFeedback(GLint n);
+void init(void);
+void reshape(int width, int height);
+void redraw();
+void mouse(int button, int state, int mouseX, int mouseY);
+void draw(void);
 void DoFeedback(void);
+void init_polygons(GLint num);
 
 #endif
