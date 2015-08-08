@@ -9,7 +9,6 @@
 #include "image_compare.h"
 
 GLint windW = 300, windH = 300;
-
 GLuint selectBuf[MAXSELECT];
 GLfloat feedBuf[MAXFEED];
 GLint vp[4];
@@ -19,6 +18,7 @@ GLint objectCount;
 GLint numObjects;
 GLenum linePoly = GL_FALSE;
 
+struct object parent_dna;
 
 void init(void) {
   numObjects = 50;
@@ -177,16 +177,42 @@ void mouse(int button, int state, int mouseX, int mouseY) {
       glutPostRedisplay();
     }
     else {
-      redraw();
-      system("scrot -u current_out.png");
-      glutPostRedisplay();
-/*      printf("****************************\n");
-      read_png_file("mona.png");
-      process_file();
-      printf("****************************\n");
-      read_png_file("current_out.png");
-      process_file();*/
-      compare_images("current_out.png","mona.png");
+      while(1) {
+      int random_poly = rand() % numObjects;
+      //memcpy(&objects[random_poly], &parent_dna, sizeof(objects[random_poly]));
+      parent_dna.v1[0] =  objects[random_poly].v1[0];
+      parent_dna.v2[0] =  objects[random_poly].v2[0];
+      parent_dna.v3[0] =  objects[random_poly].v3[0];
+      parent_dna.v1[1] =  objects[random_poly].v1[1];
+      parent_dna.v2[1] =  objects[random_poly].v2[1];
+      parent_dna.v3[1] =  objects[random_poly].v3[1];
+      parent_dna.color[0] =  objects[random_poly].color[0];
+      parent_dna.color[1] =  objects[random_poly].color[1];
+      parent_dna.color[2] =  objects[random_poly].color[2];
+      parent_dna.color[3] =  objects[random_poly].color[3];
+
+      recolor_poly(random_poly);
+      resize_poly(random_poly);
+      //redraw();
+//     glutPostRedisplay();
+      draw();
+      system("scrot -u current_out.png"); // screenshot current image
+      if (compare_images("current_out.png","mona.png") == 0) {
+        //memcpy(&parent_dna, &objects[random_poly], sizeof(parent_dna));
+        objects[random_poly].v1[0] = parent_dna.v1[0]; 
+        objects[random_poly].v2[0] = parent_dna.v2[0];   
+        objects[random_poly].v3[0] = parent_dna.v3[0];   
+        objects[random_poly].v1[1] = parent_dna.v1[1];   
+        objects[random_poly].v2[1] = parent_dna.v2[1];   
+        objects[random_poly].v3[1] = parent_dna.v3[1];   
+        objects[random_poly].color[0] = parent_dna.color[0];   
+        objects[random_poly].color[1] = parent_dna.color[1];   
+        objects[random_poly].color[2] = parent_dna.color[2];   
+        objects[random_poly].color[3] = parent_dna.color[3];   
+      }
+//      glutPostRedisplay();
+      draw();
+      }
     }
   }
 }

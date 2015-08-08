@@ -20,6 +20,7 @@ int x, y;
 int width, height;
 png_byte color_type;
 png_byte bit_depth;
+float fitness = 10000000000;
 
 png_structp png_ptr;
 png_infop info_ptr;
@@ -95,21 +96,12 @@ png_bytep* process_file(void) {
                 PNG_COLOR_TYPE_RGBA, png_get_color_type(png_ptr, info_ptr));
     }
     pixels = row_pointers;
-/*    for (y=0; y<height; y++) {
-        row = row_pointers[y];
-        for (x=0; x<width; x++) {
-            png_byte* ptr = &(row[x*3]);
-            printf("Pixel at position [ %d - %d ] has RGB values: %d - %d - %d\n",
-            x, y, ptr[0], ptr[1], ptr[2]);
-        }
-    }
-*/
     return pixels;
 }
 
 int compare_images(char* img1, char* img2) { // take monalisa as second arg
-    int fitness;
-    int pixel_fitness;
+    float image_fitness = 0;
+    float pixel_fitness = 0;
     png_bytep * image1;
     png_bytep * image2;
     read_png_file(img1);
@@ -126,12 +118,17 @@ int compare_images(char* img1, char* img2) { // take monalisa as second arg
         for (x=0; x<width; x++) {
             png_byte* ptr1 = &(row1[x*3]);
             png_byte* ptr2 = &(row2[x*3]);
-            printf("Difference in pixel color at position [ %d - %d ] is: %d - %d - %d\n",
-            x, y, ptr1[0]-ptr2[0], ptr1[1]-ptr2[1], ptr1[2]-ptr2[2]);
+            //printf("Difference in pixel color at position [ %d - %d ] is: %d - %d - %d\n",
+            //x, y, ptr1[0]-ptr2[0], ptr1[1]-ptr2[1], ptr1[2]-ptr2[2]);
             pixel_fitness = (ptr1[0]-ptr2[0])*(ptr1[0]-ptr2[0])+(ptr1[1]-ptr2[1])*(ptr1[1]-ptr2[1])+(ptr1[2]-ptr2[2])*(ptr1[2]-ptr2[2]);
-            fitness += pixel_fitness;
+            image_fitness += pixel_fitness;
         }
     }
-
-    return fitness;
+    printf("%f --- %f \n",image_fitness, fitness);
+    if(fitness > image_fitness) {
+        fitness = image_fitness;
+        return 1;
+    } else {
+        return 0;
+    }
 }

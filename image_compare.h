@@ -2,6 +2,8 @@
 #define _IMAGE_COMPARE_H_
 #include <png.h>
 
+extern float fitness;
+
 void cberror(const char * s, ...);
 void read_png_file(char* file_name);
 png_bytep* process_file(void);
