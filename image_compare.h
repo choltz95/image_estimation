@@ -5,8 +5,7 @@
 extern float fitness;
 
 void cberror(const char * s, ...);
-void read_png_file(char* file_name);
-png_bytep* process_file(void);
+png_bytep*  read_png_file(char* file_name);
 int compare_images(char* img1, char* img2);
 
 #endif

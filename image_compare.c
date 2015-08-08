@@ -24,12 +24,13 @@ float fitness = 10000000000;
 
 png_structp png_ptr;
 png_infop info_ptr;
+png_infop end_info;
 int number_of_passes;
 png_bytep * img1_row_pointers;
 png_bytep * img2_row_pointers;
 png_bytep * row_pointers;
 
-void read_png_file(char* file_name) {
+png_bytep*  read_png_file(char* file_name) {
     char header[8]; // 8 is the maximum size that can be checked
 
     /* open file and test for it being a png */
@@ -38,9 +39,9 @@ void read_png_file(char* file_name) {
         cberror("[read_png_file] File %s could not be opened for reading", file_name);
     }
     fread(header, 1, 8, fp);
-    if (png_sig_cmp(header, 0, 8)) {
+/*    if (png_sig_cmp(header, 0, 8)) {
         cberror("[read_png_file] File %s is not recognized as a PNG file", file_name);
-    }
+    }*/
 
 
     /* initialize stuff */
@@ -56,6 +57,7 @@ void read_png_file(char* file_name) {
     if (setjmp(png_jmpbuf(png_ptr))) {
         cberror("[read_png_file] Error during init_io");
     }
+    end_info = png_create_info_struct(png_ptr);
 
     png_init_io(png_ptr, fp);
     png_set_sig_bytes(png_ptr, 8);
@@ -83,20 +85,7 @@ void read_png_file(char* file_name) {
     png_read_image(png_ptr, row_pointers);
 
     fclose(fp);
-}
-
-png_bytep* process_file(void) {
-    png_bytep * pixels;
-    if (png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_RGBA) {
-        cberror("[process_file] input file is PNG_COLOR_TYPE_RGBA but must be PNG_COLOR_TYPE_RGB "
-                "(lacks the alpha channel)");
-    }
-    if (png_get_color_type(png_ptr, info_ptr) != PNG_COLOR_TYPE_RGB) {
-        cberror("[process_file] color_type of input file must be PNG_COLOR_TYPE_RGB (%d) (is %d)",
-                PNG_COLOR_TYPE_RGBA, png_get_color_type(png_ptr, info_ptr));
-    }
-    pixels = row_pointers;
-    return pixels;
+    return row_pointers;
 }
 
 int compare_images(char* img1, char* img2) { // take monalisa as second arg
@@ -104,13 +93,27 @@ int compare_images(char* img1, char* img2) { // take monalisa as second arg
     float pixel_fitness = 0;
     png_bytep * image1;
     png_bytep * image2;
-    read_png_file(img1);
-    image1 = process_file();
-    read_png_file(img2);
-    image2 = process_file();
+
+    image1 =read_png_file(img1);
+    png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+    /* cleanup heap allocation */
+    for (y=0; y<height; y++) {
+            free(row_pointers[y]);
+    }
+    free(row_pointers);
+
+    image2=read_png_file(img2);
+    png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+       /* cleanup heap allocation */
+    for (y=0; y<height; y++) {
+            free(row_pointers[y]);
+    }
+    free(row_pointers);
+
 
     png_byte * row1;
     png_byte * row2;
+
 
     for (y=0; y<height; y++) {
         row1 = image1[y];
@@ -124,8 +127,9 @@ int compare_images(char* img1, char* img2) { // take monalisa as second arg
             image_fitness += pixel_fitness;
         }
     }
-    printf("%f --- %f \n",image_fitness, fitness);
+
     if(fitness > image_fitness) {
+        printf("%f --- %f \n",image_fitness, fitness);
         fitness = image_fitness;
         return 1;
     } else {

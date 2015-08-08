@@ -17,6 +17,7 @@ float zoom = 1.0;
 GLint objectCount;
 GLint numObjects;
 GLenum linePoly = GL_FALSE;
+int j = 0;
 
 struct object parent_dna;
 
@@ -137,9 +138,9 @@ static void resize_poly(GLint h) {
 }
 
 void redraw() {
-GLint i;
-float x, y;
-for (i = 0; i < numObjects; i++) {
+  GLint i;
+  float x, y;
+  for (i = 0; i < numObjects; i++) {
     x = (rand() % 300) - 150;
     y = (rand() % 300) - 150;
 
@@ -177,42 +178,40 @@ void mouse(int button, int state, int mouseX, int mouseY) {
       glutPostRedisplay();
     }
     else {
-      while(1) {
-      int random_poly = rand() % numObjects;
-      //memcpy(&objects[random_poly], &parent_dna, sizeof(objects[random_poly]));
-      parent_dna.v1[0] =  objects[random_poly].v1[0];
-      parent_dna.v2[0] =  objects[random_poly].v2[0];
-      parent_dna.v3[0] =  objects[random_poly].v3[0];
-      parent_dna.v1[1] =  objects[random_poly].v1[1];
-      parent_dna.v2[1] =  objects[random_poly].v2[1];
-      parent_dna.v3[1] =  objects[random_poly].v3[1];
-      parent_dna.color[0] =  objects[random_poly].color[0];
-      parent_dna.color[1] =  objects[random_poly].color[1];
-      parent_dna.color[2] =  objects[random_poly].color[2];
-      parent_dna.color[3] =  objects[random_poly].color[3];
+     // for (j=0; j<25; j++) { // temporary for debugging
+        int random_poly = rand() % numObjects;
+        //memcpy(&objects[random_poly], &parent_dna, sizeof(objects[random_poly]));
+        parent_dna.v1[0] =  objects[random_poly].v1[0];
+        parent_dna.v2[0] =  objects[random_poly].v2[0];
+        parent_dna.v3[0] =  objects[random_poly].v3[0];
+        parent_dna.v1[1] =  objects[random_poly].v1[1];
+        parent_dna.v2[1] =  objects[random_poly].v2[1];
+        parent_dna.v3[1] =  objects[random_poly].v3[1];
+        parent_dna.color[0] =  objects[random_poly].color[0];
+        parent_dna.color[1] =  objects[random_poly].color[1];
+        parent_dna.color[2] =  objects[random_poly].color[2];
+        parent_dna.color[3] =  objects[random_poly].color[3];
 
-      recolor_poly(random_poly);
-      resize_poly(random_poly);
-      //redraw();
-//     glutPostRedisplay();
-      draw();
-      system("scrot -u current_out.png"); // screenshot current image
-      if (compare_images("current_out.png","mona.png") == 0) {
-        //memcpy(&parent_dna, &objects[random_poly], sizeof(parent_dna));
-        objects[random_poly].v1[0] = parent_dna.v1[0]; 
-        objects[random_poly].v2[0] = parent_dna.v2[0];   
-        objects[random_poly].v3[0] = parent_dna.v3[0];   
-        objects[random_poly].v1[1] = parent_dna.v1[1];   
-        objects[random_poly].v2[1] = parent_dna.v2[1];   
-        objects[random_poly].v3[1] = parent_dna.v3[1];   
-        objects[random_poly].color[0] = parent_dna.color[0];   
-        objects[random_poly].color[1] = parent_dna.color[1];   
-        objects[random_poly].color[2] = parent_dna.color[2];   
-        objects[random_poly].color[3] = parent_dna.color[3];   
-      }
-//      glutPostRedisplay();
-      draw();
-      }
+        recolor_poly(random_poly);
+        resize_poly(random_poly);
+
+        draw();
+        system("scrot -u current_out.png"); // screenshot current image
+        if (compare_images("current_out.png","mona.png") == 0) {
+          //memcpy(&parent_dna, &objects[random_poly], sizeof(parent_dna));
+          objects[random_poly].v1[0] = parent_dna.v1[0]; 
+          objects[random_poly].v2[0] = parent_dna.v2[0];   
+          objects[random_poly].v3[0] = parent_dna.v3[0];   
+          objects[random_poly].v1[1] = parent_dna.v1[1];   
+          objects[random_poly].v2[1] = parent_dna.v2[1];   
+          objects[random_poly].v3[1] = parent_dna.v3[1];   
+          objects[random_poly].color[0] = parent_dna.color[0];   
+          objects[random_poly].color[1] = parent_dna.color[1];   
+          objects[random_poly].color[2] = parent_dna.color[2];   
+          objects[random_poly].color[3] = parent_dna.color[3];   
+        }
+        draw();
+      //}
     }
   }
 }
