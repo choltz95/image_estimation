@@ -178,7 +178,7 @@ void mouse(int button, int state, int mouseX, int mouseY) {
       glutPostRedisplay();
     }
     else {
-     // for (j=0; j<25; j++) { // temporary for debugging
+      for (j=0; j<25; j++) { // temporary for debugging
         int random_poly = rand() % numObjects;
         //memcpy(&objects[random_poly], &parent_dna, sizeof(objects[random_poly]));
         parent_dna.v1[0] =  objects[random_poly].v1[0];
@@ -211,7 +211,7 @@ void mouse(int button, int state, int mouseX, int mouseY) {
           objects[random_poly].color[3] = parent_dna.color[3];   
         }
         draw();
-      //}
+      }
     }
   }
 }
