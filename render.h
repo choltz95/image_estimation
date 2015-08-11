@@ -28,5 +28,6 @@ void mouse(int button, int state, int mouseX, int mouseY);
 void draw(void);
 void DoFeedback(void);
 void init_polygons(GLint num);
+void mutate();
 
 #endif

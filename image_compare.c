@@ -8,8 +8,7 @@
 #include <png.h>
 #include "image_compare.h"
 
-void abort_(const char * s, ...)
-{
+void abort_(const char * s, ...) {
         va_list args;
         va_start(args, s);
         vfprintf(stderr, s, args);
@@ -17,6 +16,8 @@ void abort_(const char * s, ...)
         va_end(args);
         abort();
 }
+int loaded = 0;
+int h1, w1, h2, w2;
 
 int x, y;
 float fitness = 100000000000; // inf
@@ -105,24 +106,16 @@ int compare_images(char* fname1, char* fname2) { // mona arg2
     float current_fitness = 0;
     float dr, dg, db, dr2, dg2, db2;
 
-    int h1, w1, h2, w2;
     UNUSED(w1);
     row_pointers_1 = read_png_file(fname1, row_pointers_1);
     h1 = height;
     w1 = width;
-    row_pointers_2 = read_png_file(fname2, row_pointers_2);
-    h2 = height;
-    w2 = width;
-
-/*
-    if (png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_RGB)
-        abort_("[process_file] input file is PNG_COLOR_TYPE_RGB but must be PNG_COLOR_TYPE_RGBA "
-               "(lacks the alpha channel)");
-
-    if (png_get_color_type(png_ptr, info_ptr) != PNG_COLOR_TYPE_RGBA)
-        abort_("[process_file] color_type of input file must be PNG_COLOR_TYPE_RGBA (%d) (is %d)",
-               PNG_COLOR_TYPE_RGBA, png_get_color_type(png_ptr, info_ptr));
-*/
+    if(loaded == 0) {
+        row_pointers_2 = read_png_file(fname2, row_pointers_2);
+        h2 = height;
+        w2 = width;
+        loaded = 1;
+    }
 
     for (y=0; y<h2; y++) {
         png_byte* row1 = row_pointers_1[y];
@@ -148,11 +141,12 @@ int compare_images(char* fname1, char* fname2) { // mona arg2
         free(row_pointers_1[y]);
     }
     free(row_pointers_1);
+/*    
     for (y=0; y<h2; y++) {
         free(row_pointers_2[y]);
     }
     free(row_pointers_2);
-
+*/
     if (current_fitness < fitness) {
         printf( "%f - %f \n", current_fitness, fitness);
         fitness = current_fitness;
@@ -161,5 +155,4 @@ int compare_images(char* fname1, char* fname2) { // mona arg2
     else {
         return 0;
     }
-    return 0;
 }

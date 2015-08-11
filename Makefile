@@ -20,4 +20,8 @@ main: $(OBJFILES)
 clean:
 	-@rm -f $(TARGET) $(OBJFILES) $(DEPFILES)
 
+#  gprof main gmon.out > prof_output
+profile: $(OBJFILES)
+	 $(CC) $(CFLAGS) -pg $(OBJFILES) -o main $(LDFLAGS)
+
 print-%: ; @echo $*=$($*)

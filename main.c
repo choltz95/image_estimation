@@ -31,6 +31,11 @@ static void key(unsigned char key, int x, int y) {
     }
     glutPostRedisplay();
     break;
+  case ' ':
+    while(1) {
+      mutate();
+    }
+    break;
   case 27:
     exit(0);
   }
@@ -55,7 +60,7 @@ static void special_key(int key, int x, int y) {
 int main(int argc, char **argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-  glutCreateWindow("Select Test");
+  glutCreateWindow("Image Estimation");
   init();
   glutReshapeFunc(reshape);
   glutKeyboardFunc(key);
